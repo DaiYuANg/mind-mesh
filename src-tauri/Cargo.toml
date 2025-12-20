@@ -1,0 +1,65 @@
+[package]
+name = "mindmesh"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "mindmesh_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1.19.0", features = ["serde", "default", "v4", "v7"] }
+tokio = { version = "1.48.0", features = ["full"] }
+fs_extra = { version = "1.3.0" }
+directories = "6.0.0"
+tracing = "0.1.44"
+anyhow = "1.0.100"
+thiserror = "2.0.17"
+notify = { version = "8.2.0", features = ["serde"] }
+chrono = { version = "0.4.42", features = ["serde"] }
+zip = "7.0.0"
+tar = "0.4.44"
+tauri-plugin-os = "2"
+tauri-plugin-log = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-store = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-clipboard-manager = "2"
+sea-orm = { workspace = true, features = ["sqlx-sqlite", "runtime-tokio", "macros"] }
+entity = { path = "entity" }
+repository = { path = "repository" }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-window-state = "2"
+
+[target."cfg(target_os = \"macos\")".dependencies]
+cocoa = "0.26.1"
+
+[dev-dependencies]
+sea-orm-cli = "2.0.0-rc.21"
+
+[workspace]
+members = [
+  'entity',
+  'repository'
+]
+
+[workspace.dependencies]
+sea-orm = "2.0.0-rc.21"
+serde = "1"
+serde_json = "1"
