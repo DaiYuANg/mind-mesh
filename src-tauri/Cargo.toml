@@ -42,6 +42,7 @@ tauri-plugin-clipboard-manager = "2"
 sea-orm = { workspace = true, features = ["sqlx-sqlite", "runtime-tokio", "macros"] }
 entity = { path = "entity" }
 repository = { path = "repository" }
+migration = { path = "migration" }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
@@ -51,15 +52,16 @@ tauri-plugin-window-state = "2"
 cocoa = "0.26.1"
 
 [dev-dependencies]
-sea-orm-cli = "2.0.0-rc.21"
+sea-orm-cli = "1.1.19"
 
 [workspace]
 members = [
   'entity',
-  'repository'
+  'repository',
+  'migration'
 ]
 
 [workspace.dependencies]
-sea-orm = "2.0.0-rc.21"
+sea-orm = "1.1.19"
 serde = "1"
 serde_json = "1"

@@ -7,7 +7,7 @@ import { invoke } from '@tauri-apps/api/core'
 const Dashboard: FC = () => {
   const selectProjectFolder = async () => {
     const result = await invoke('select_directory')
-    console.log(result)
+
   }
 
   return (

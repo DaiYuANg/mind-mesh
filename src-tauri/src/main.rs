@@ -3,5 +3,5 @@
 
 #[tokio::main]
 async fn main() {
-  mindmesh_lib::run()
+  mindmesh_lib::run().await
 }

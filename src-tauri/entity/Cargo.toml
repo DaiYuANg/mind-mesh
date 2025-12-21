@@ -8,3 +8,4 @@ serde = { workspace = true, features = ["derive"] }
 
 [dependencies.sea-orm]
 workspace = true
+features = ["default", "macros"]
