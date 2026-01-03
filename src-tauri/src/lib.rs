@@ -1,41 +1,56 @@
 use crate::app_state::AppState;
 use crate::commands::file_commands::greet;
 use crate::commands::file_commands::select_directory;
+use directories::ProjectDirs;
+use migration::{Migrator, MigratorTrait};
 use std::time::Duration;
 use tauri::{Manager, TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_store::StoreBuilder;
+use tokio::fs;
 use tokio::sync::Mutex;
 
 mod app_state;
 mod commands;
 mod model;
 
-fn init_app_state() -> AppState {
-  // let home_dir = UserDirs::new()
-  //   .expect("无法获取 home 目录")
-  //   .home_dir()
-  //   .to_path_buf();
-  //
-  // let db_dir = home_dir.join(".mindmesh");
-  // let db_path = db_dir.join("metadata.redb");
-  //
-  // // 确保父目录存在
-  // if let Err(e) = fs::create_dir_all(&db_dir) {
-  //   panic!("无法创建目录 {:?}: {}", db_dir, e);
-  // }
-  //
-  // println!("Database path: {:?}", db_path);
-  // assert!(db_dir.exists(), "父目录不存在");
-  // let db = Database::create(db_path).expect("无法创建数据库");
-  //
-  // AppState { db: Arc::new(db) }
+async fn init_app_state() -> AppState {
+  // 获取项目特定的目录（跨平台支持）
+  let project_dirs = ProjectDirs::from("org", "daiyuang", "mindmesh")
+    .ok_or("无法获取项目目录")
+    .unwrap();
+
+  // 数据目录
+  let data_dir = project_dirs.data_dir();
+
+  // 确保目录存在
+  fs::create_dir_all(&data_dir).await.unwrap();
+
+  // 设置数据库路径
+  let db_path = data_dir.join("database.sqlite");
+  println!("数据库路径: {:?}", db_path);
+
+  // 构建正确的 SQLite 连接字符串
+  let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
+
+  // 或者使用以下格式之一：
+  // let db_url = format!("sqlite:{}?mode=rwc", db_path.to_string_lossy());
+  // let db_url = format!("sqlite:///{}?mode=rwc", db_path.to_string_lossy());
+
+  println!("连接字符串: {}", db_url);
+
+  // 连接到数据库
+  let connection = sea_orm::Database::connect(db_url).await.unwrap();
+
+  // 运行迁移
+  Migrator::up(&connection, None).await.unwrap();
+
   AppState {}
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
+pub async fn run() {
   tauri::async_runtime::set(tokio::runtime::Handle::current());
-  let state = init_app_state();
+  let state = init_app_state().await;
   tauri::Builder::default()
     .plugin(tauri_plugin_clipboard_manager::init())
     .plugin(tauri_plugin_dialog::init())
