@@ -12,9 +12,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
+import { WinControls } from '@/components/windows-window-control.tsx'
 
 // This is sample data.
 const data = {
@@ -42,6 +42,7 @@ const data = {
 export function SidebarRight({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="none" className="sticky top-0 hidden h-svh border-l lg:flex" {...props}>
+      <WinControls />
       <SidebarHeader className="border-sidebar-border h-16 border-b">
         <NavUser user={data.user} />
       </SidebarHeader>

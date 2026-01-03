@@ -16,11 +16,19 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu.tsx'
 
-const BrowserTab = ({ active, title }: { active?: boolean; title: string }) => {
+type BrowserTabProps = {
+  active?: boolean
+  title?: string
+  onClick?: () => void
+  onClose?: () => void
+}
+
+const BrowserTab = ({ active, title, onClick, onClose }: BrowserTabProps) => {
   return (
     <ContextMenu>
       <ContextMenuTrigger>
         <div
+          onClick={onClick}
           className={cn(
             'group relative flex h-8 items-center gap-2 px-3',
             'rounded-t-md text-sm select-none cursor-pointer',
@@ -34,6 +42,10 @@ const BrowserTab = ({ active, title }: { active?: boolean; title: string }) => {
           <span className="truncate max-w-30 leading-none">{title}</span>
 
           <div
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose?.()
+            }}
             className={cn(
               'ml-1 flex h-4 w-4 items-center justify-center rounded',
               'opacity-0 group-hover:opacity-100',
@@ -84,3 +96,4 @@ const BrowserTab = ({ active, title }: { active?: boolean; title: string }) => {
 }
 
 export { BrowserTab }
+export type { BrowserTabProps }

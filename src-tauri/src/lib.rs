@@ -1,17 +1,23 @@
 use crate::app_state::AppState;
 use crate::commands::file_commands::greet;
 use crate::commands::file_commands::select_directory;
+use crate::ui::tab_manager::TabManager;
 use directories::ProjectDirs;
 use migration::{Migrator, MigratorTrait};
 use std::time::Duration;
-use tauri::{Manager, TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_store::StoreBuilder;
 use tokio::fs;
 use tokio::sync::Mutex;
+use tracing::info;
 
 mod app_state;
 mod commands;
+mod git;
 mod model;
+mod ui;
 
 async fn init_app_state() -> AppState {
   // 获取项目特定的目录（跨平台支持）
@@ -25,16 +31,10 @@ async fn init_app_state() -> AppState {
   // 确保目录存在
   fs::create_dir_all(&data_dir).await.unwrap();
 
-  // 设置数据库路径
   let db_path = data_dir.join("database.sqlite");
   println!("数据库路径: {:?}", db_path);
 
-  // 构建正确的 SQLite 连接字符串
   let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
-
-  // 或者使用以下格式之一：
-  // let db_url = format!("sqlite:{}?mode=rwc", db_path.to_string_lossy());
-  // let db_url = format!("sqlite:///{}?mode=rwc", db_path.to_string_lossy());
 
   println!("连接字符串: {}", db_url);
 
@@ -62,14 +62,25 @@ pub async fn run() {
         .build(),
     )
     .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-    .plugin(tauri_plugin_window_state::Builder::new().build())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_opener::init())
     .enable_macos_default_menu(true)
     .setup(move |app| {
-      let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+      let mut win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
         .inner_size(1000.0, 800.0)
+        .resizable(true)
+        .devtools(true)
         .center();
+
+      // Windows 无系统装饰
+      #[cfg(target_os = "windows")]
+      {
+        info!("custom windows decorations");
+        win_builder = win_builder
+          .decorations(false)
+          .shadow(true)
+          .transparent(true);
+      }
 
       // set transparent title bar only when building for macOS
       #[cfg(target_os = "macos")]
@@ -79,7 +90,7 @@ pub async fn run() {
         .center()
         .hidden_title(true);
 
-      let window = win_builder.build().unwrap();
+      let _window = win_builder.build().unwrap();
 
       // set background color only when building for macOS
       #[cfg(target_os = "macos")]
@@ -105,6 +116,7 @@ pub async fn run() {
         .build();
       app.manage(store);
       app.manage(Mutex::new(state));
+      app.manage(std::sync::Mutex::new(TabManager::new()));
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![greet, select_directory])

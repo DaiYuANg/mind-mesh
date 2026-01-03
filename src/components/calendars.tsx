@@ -1,7 +1,11 @@
-import * as React from 'react'
-import { Check, ChevronRight } from 'lucide-react'
+import * as React from "react"
+import { Check, ChevronRight } from "lucide-react"
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -10,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-} from '@/components/ui/sidebar'
+} from "@/components/ui/sidebar"
 
 export function Calendars({
   calendars,
@@ -25,13 +29,16 @@ export function Calendars({
       {calendars.map((calendar, index) => (
         <React.Fragment key={calendar.name}>
           <SidebarGroup key={calendar.name} className="py-0">
-            <Collapsible defaultOpen={index === 0} className="group/collapsible">
+            <Collapsible
+              defaultOpen={index === 0}
+              className="group/collapsible"
+            >
               <SidebarGroupLabel
                 asChild
                 className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-full text-sm"
               >
                 <CollapsibleTrigger>
-                  {calendar.name}{' '}
+                  {calendar.name}{" "}
                   <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
